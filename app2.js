@@ -3,6 +3,7 @@ var path = require('path');
 var app = express();
 var Twitter = require('twitter');
 
+
 // Define the port to run on
 app.set('port', 9000);
 app.use(express.static(path.join(__dirname, '/public/')));
@@ -21,6 +22,8 @@ var client = new Twitter({
   access_token_key: '35708497-DhwN2m5dab6VvGqN5031BJHd6NopIb0M1mwMVv2Xs',
   access_token_secret: 'mB9GvqPgDsinZxZ9KW1tjkB93orQng9gf1IRokmIytJa6'
 });
+
+
 
 
 io.on('connection', function(socket) {
@@ -43,4 +46,32 @@ io.on('connection', function(socket) {
             }
         );
     });
+
+    socket.on('unreal-tweet', function(data) {
+        console.log("media tweet");
+        var image = require('fs').readFileSync("E:\\HighresScreenshot00002.jpg");
+        // Make post request on media endpoint. Pass file data as media parameter
+        client.post('media/upload', {media: image}, function(error, media, response) {
+
+          if (!error) {
+
+            // If successful, a media object will be returned.
+            console.log(media);
+
+            // Lets tweet it
+            var status = {
+              status: 'I am another tweet. I am a screenshot from Unreal Engine 4 During a gameplay',
+              media_ids: media.media_id_string // Pass the media id string
+            }
+
+            client.post('statuses/update', status, function(error, tweet, response) {
+              if (!error) {
+                console.log(tweet);
+              }
+            });
+
+          }
+        });
+    });
+
 });
